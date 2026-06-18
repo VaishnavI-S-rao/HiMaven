@@ -2,16 +2,25 @@ trigger:
 - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: ubuntu-latest
 
-steps:
-- task: Maven@4
-  inputs:
-    mavenPomFile: 'pom.xml'
-    goals: 'clean package'
-    publishJUnitResults: false
+stages:
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: 'target'
-    ArtifactName: 'drop'
+- stage: Build
+  jobs:
+  - job: BuildJob
+    steps:
+    - task: Maven@4
+      inputs:
+        mavenPomFile: 'pom.xml'
+        goals: 'clean package'
+
+- stage: Deploy
+  jobs:
+  - deployment: DeployToDev
+    environment: Dev
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - script: echo "Application Deployed Successfully"
